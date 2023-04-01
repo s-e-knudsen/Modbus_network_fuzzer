@@ -20,5 +20,6 @@ Phython3 modbus.py 10.10.10.10 502
 
 
 
-
-The scripts are managed by Egede and attributions and support from other is verry welcome 😊
+-------------------------------------------------------------------------------------------------
+The modbus fuzzer is managed by Egede and attributions and support from other is verry welcome 😊
+-------------------------------------------------------------------------------------------------
