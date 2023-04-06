@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # Designed for use with boofuzz v0.4.1
+# Author : Soren Egede Knudsen - Egede ApS
 import sys
 from boofuzz import *
 
