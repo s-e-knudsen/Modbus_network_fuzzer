@@ -25,6 +25,8 @@ def main():
     functioncodeWriteFileRecord = ["Write File Record"]
     functioncodeReadExceptionStatus = ["Read Exception Status"]
     functioncodeReportSlaveID = ["Report Slave ID"]
+    functioncodeReadCoilMemory = ["Read Coil Memory"]
+
 
 
     # Checking command arguments and usage
@@ -54,6 +56,7 @@ def main():
         13. Fuzz Write File Record
         14. Fuzz Read Exception Status
         15. Fuzz Report Slave ID
+        16. Fuzz Read Coil Memory
         0. Exit
         """)
         menuAnswer = input("\nSelect an option: ")
@@ -102,7 +105,10 @@ def main():
             break
         elif int(menuAnswer) == 15:
             functionCodesToFuzz = functioncodeReportSlaveID
-            break       
+            break  
+        elif int(menuAnswer) == 16:
+            functionCodesToFuzz = functioncodeReadCoilMemory
+            break            
         elif int(menuAnswer) == 0:
             print("\n Exiting the modbus fuzzer!")
             exit(0)
@@ -119,7 +125,7 @@ def main():
 
     # Boofuzz initializers ----
     # Read registers ---
-    s_initialize("read_coil_memory")
+    s_initialize("Read Coil Memory")
     #ModbusTCP
     s_bytes(b"\x00\x01", name='Trans ID', fuzzable=True)
     s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
@@ -304,6 +310,7 @@ def main():
     for code in functionCodesToFuzz:
         print(functionCodesToFuzz)
         session.connect(s_get(code))
+        #session.connect(s_get(fuzzer.fuzzing(code)))
     
     session.fuzz()
 
