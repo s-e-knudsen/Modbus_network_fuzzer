@@ -6,7 +6,25 @@ from boofuzz import *
 def main():
 
     #variables and lists
-    functionCodes = ("Read Device Identification", "Read Discrete Inputs", "Read Input Registers", "Read Multiple Holding Registers", "Write Single Holding Register", "Write Single Coil", "Write Multiple Coils", "Write Multiple Holding Registers", "Read/Write Multiple Registers", "Mask Write Register", "Read File Record", "WriteFileRecord", "Read Exception Status", "Report Slave ID", "Read Device Identification")
+    menuactive = True
+    menuAnswer = 0
+    functionCodesToFuzz = []
+    functionCodesAll = ["Read Device Identification", "Read Discrete Inputs", "Read Input Registers", "Read Multiple Holding Registers", "Write Single Holding Register", "Write Single Coil", "Write Multiple Coils", "Write Multiple Holding Registers", "Read/Write Multiple Registers", "Mask Write Register", "Read File Record", "Write File Record", "Read Exception Status", "Report Slave ID"]
+    functionCodeReadDeviceIdentification = ["Read Device Identification"]
+    functionCodesReadDiscreteInputs = ["Read Discrete Inputs"]
+    functioncodeReadInputRegisters = ["Read Input Registers"]
+    functioncodeReadMultipleHoldingRegisters = ["Read Multiple Holding Registers"]
+    functioncodeWriteSingleHoldingRegister = ["Write Single Holding Register"]
+    functioncodeWriteSingleCoil = ["Write Single Coil"]
+    functioncodeWriteMultipleCoils = ["Write Multiple Coils"]
+    functioncodeWriteMultipleHoldingRegisters = ["Write Multiple Holding Registers"]
+    functioncodeRead_WriteMultipleRegisters = ["Read/Write Multiple Registers"]
+    functioncodeMaskWriteRegister = ["Mask Write Register"]
+    functioncodeReadFileRecord = ["Read File Record"]
+    functioncodeWriteFileRecord = ["Write File Record"]
+    functioncodeReadExceptionStatus = ["Read Exception Status"]
+    functioncodeReportSlaveID = ["Report Slave ID"]
+
 
     # Checking command arguments and usage
     if len(sys.argv) < 2:
@@ -15,6 +33,81 @@ def main():
 
     host = sys.argv[1]
     port = int(sys.argv[2])
+
+    #Menu selction of what to fuzz
+    while menuactive:
+        print("""
+        What do you want to fuzz?
+        1.  Fuzz all function codes
+        2.  Fuzz Read Device Identification
+        3.  Fuzz Read Discrete Inputs
+        4.  Fuzz Read Input Registers
+        5.  Fuzz Read Multiple Holding Registers
+        6.  Fuzz Write Single Holding Register
+        7.  Fuzz Write Single Coil
+        8.  Fuzz Write Multiple Coils
+        9.  Fuzz Write Multiple Holding Registers
+        10. Fuzz Read/Write Multiple Registers
+        11. Fuzz Mask Write Register
+        12. Fuzz Read File Record
+        13. Fuzz Write File Record
+        14. Fuzz Read Exception Status
+        15. Fuzz Report Slave ID
+        0. Exit
+        """)
+        menuAnswer = input("\nSelect an option: ")
+        if int(menuAnswer) == 1:
+            print("\n All are seleted!!")
+            functionCodesToFuzz = functionCodesAll
+            break
+        elif int(menuAnswer) == 2:
+            functionCodesToFuzz = functionCodeReadDeviceIdentification
+            break
+        elif int(menuAnswer) == 3:
+            functionCodesToFuzz = functionCodesReadDiscreteInputs
+            break
+        elif int(menuAnswer) == 4:
+            functionCodesToFuzz = functioncodeReadInputRegisters
+            break
+        elif int(menuAnswer) == 5:
+            functionCodesToFuzz = functioncodeReadMultipleHoldingRegisters
+            break
+        elif int(menuAnswer) == 6:
+            functionCodesToFuzz = functioncodeWriteSingleHoldingRegister 
+            break
+        elif int(menuAnswer) == 7:
+            functionCodesToFuzz = functioncodeWriteSingleCoil
+            break
+        elif int(menuAnswer) == 8:
+            functionCodesToFuzz = functioncodeWriteMultipleCoils
+            break     
+        elif int(menuAnswer) == 9:
+            functionCodesToFuzz = functioncodeWriteMultipleHoldingRegisters
+            break 
+        elif int(menuAnswer) == 10:
+            functionCodesToFuzz = functioncodeRead_WriteMultipleRegisters
+            break 
+        elif int(menuAnswer) == 11:
+            functionCodesToFuzz = functioncodeMaskWriteRegister
+            break 
+        elif int(menuAnswer) == 12:
+            functionCodesToFuzz = functioncodeReadFileRecord
+            break 
+        elif int(menuAnswer) == 13:
+            functionCodesToFuzz = functioncodeWriteFileRecord
+            break         
+        elif int(menuAnswer) == 14:
+            functionCodesToFuzz = functioncodeReadExceptionStatus
+            break
+        elif int(menuAnswer) == 15:
+            functionCodesToFuzz = functioncodeReportSlaveID
+            break       
+        elif int(menuAnswer) == 0:
+            print("\n Exiting the modbus fuzzer!")
+            exit(0)
+        else:
+            print("\n Wrong selection try again")
+        
 
     #Connect to the Modbus devise
     session = Session(
@@ -159,7 +252,7 @@ def main():
     s_byte(0x14,name='Read File Record',fuzzable=False)
     s_byte(0x00,name='Byte count',fuzzable=False)
 
-    s_initialize("WriteFileRecord")
+    s_initialize("Write File Record")
     #ModbusTCP
     s_bytes(b"\x00\x01", name='Trans ID', fuzzable=True)
     s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
@@ -206,7 +299,9 @@ def main():
     s_byte(0x00, name='Read Device Id', fuzzable=True)
     s_byte(0x00, name='Object vendor name', fuzzable=True)
 
-    for code in functionCodes:
+    
+    for code in functionCodesToFuzz:
+        print(functionCodesToFuzz)
         session.connect(s_get(code))
     
     session.fuzz()
