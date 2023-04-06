@@ -310,8 +310,7 @@ def main():
     for code in functionCodesToFuzz:
         print(functionCodesToFuzz)
         session.connect(s_get(code))
-        #session.connect(s_get(fuzzer.fuzzing(code)))
-    
+           
     session.fuzz()
 
 
