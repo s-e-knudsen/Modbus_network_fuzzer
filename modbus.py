@@ -308,7 +308,6 @@ def main():
 
     
     for code in functionCodesToFuzz:
-        print(functionCodesToFuzz)
         session.connect(s_get(code))
            
     session.fuzz()
