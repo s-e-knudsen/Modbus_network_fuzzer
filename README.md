@@ -1,7 +1,7 @@
 # Modbus network fuzzer
 ### Network fuzzer for the modbus protocol
 
-Comming soon....
+The modbus network fuzzer uses Boofuzz for the fuzzing of the protocol. 
 
 ![fuzzing_2](https://user-images.githubusercontent.com/5167692/230782624-acee0465-8463-4deb-97fc-2e628d027046.png)
 
