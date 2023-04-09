@@ -16,7 +16,7 @@ Running the fuzzer:
 ````
 python3 modbus.py IP Port
 
-Phython3 modbus.py 10.10.10.10 502
+Python3 modbus.py 10.10.10.10 502
 
 ````
 
