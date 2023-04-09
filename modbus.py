@@ -10,7 +10,7 @@ def main():
     menuactive = True
     menuAnswer = 0
     functionCodesToFuzz = []
-    functionCodesAll = ["Read Device Identification", "Read Discrete Inputs", "Read Input Registers", "Read Multiple Holding Registers", "Write Single Holding Register", "Write Single Coil", "Write Multiple Coils", "Write Multiple Holding Registers", "Read/Write Multiple Registers", "Mask Write Register", "Read File Record", "Write File Record", "Read Exception Status", "Report Slave ID"]
+    functionCodesAll = ["Base", "Read Device Identification", "Read Discrete Inputs", "Read Input Registers", "Read Multiple Holding Registers", "Write Single Holding Register", "Write Single Coil", "Write Multiple Coils", "Write Multiple Holding Registers", "Read/Write Multiple Registers", "Mask Write Register", "Read File Record", "Write File Record", "Read Exception Status", "Report Slave ID"]
     functionCodeReadDeviceIdentification = ["Read Device Identification"]
     functionCodesReadDiscreteInputs = ["Read Discrete Inputs"]
     functioncodeReadInputRegisters = ["Read Input Registers"]
@@ -26,6 +26,8 @@ def main():
     functioncodeReadExceptionStatus = ["Read Exception Status"]
     functioncodeReportSlaveID = ["Report Slave ID"]
     functioncodeReadCoilMemory = ["Read Coil Memory"]
+    functioncodeBase = ["Base"] 
+
 
 
 
@@ -40,8 +42,11 @@ def main():
     #Menu selction of what to fuzz
     while menuactive:
         print("""
+        --------------------------------------
+        Created by Soren Egede Knudsen @Egede
+        --------------------------------------
         What do you want to fuzz?
-        1.  Fuzz all function codes
+        1.  Fuzz all function codes and base
         2.  Fuzz Read Device Identification
         3.  Fuzz Read Discrete Inputs
         4.  Fuzz Read Input Registers
@@ -57,6 +62,7 @@ def main():
         14. Fuzz Read Exception Status
         15. Fuzz Report Slave ID
         16. Fuzz Read Coil Memory
+        20. Fuzz ModbusTCP - Base protocol
         0. Exit
         """)
         menuAnswer = input("\nSelect an option: ")
@@ -108,7 +114,10 @@ def main():
             break  
         elif int(menuAnswer) == 16:
             functionCodesToFuzz = functioncodeReadCoilMemory
-            break            
+            break      
+        elif int(menuAnswer) == 20:
+            functionCodesToFuzz = functioncodeBase
+            break       
         elif int(menuAnswer) == 0:
             print("\n Exiting the modbus fuzzer!")
             exit(0)
@@ -124,13 +133,28 @@ def main():
     )
 
     # Boofuzz initializers ----
+    # base fuzzing ModbusTCP
+    s_initialize("Base")
+    #ModbusTCP
+    s_byte(0x00, name='Trans ID part one', fuzzable=False) #part one is staticx½
+    s_byte(0x01, name='Trans ID part two', fuzzable=True) # part two chenges in two lines to minimise fuzzing 
+    s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
+    s_byte(0x00, name='Length part one', fuzzable=False) #part one is static
+    s_byte(0x06, name='Length part two', fuzzable=True)
+    s_byte(0xff,name='unit Identifier',fuzzable=True)  #0xff = server/manster
+    #Modbus
+    s_byte(0x01,name='funcCode read coil memory', fuzzable=False)
+    s_bytes(b"\x00\x01", name='Start address', fuzzable=False)
+    s_bytes(b"\x00\x10", name='Word count - amount', fuzzable=False)
+
+
     # Read registers ---
     s_initialize("Read Coil Memory")
     #ModbusTCP
-    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=True)
+    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=False)
     s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
-    s_bytes(b"\x00\x06", name='Length', fuzzable=True)
-    s_byte(0xff,name='unit Identifier',fuzzable=True)  
+    s_bytes(b"\x00\x06", name='Length', fuzzable=False)
+    s_byte(0xff,name='unit Identifier',fuzzable=False)  #0xff = server/manster 0x01 = client
     #Modbus
     s_byte(0x01,name='funcCode read coil memory', fuzzable=False)
     s_bytes(b"\x00\x01", name='Start address', fuzzable=True)
@@ -138,10 +162,10 @@ def main():
 
     s_initialize("Read Discrete Inputs")
     #ModbusTCP
-    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=True)
+    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=False)
     s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
-    s_bytes(b"\x00\x06", name='Length', fuzzable=True)
-    s_byte(0xff,name='unit Identifier',fuzzable=True)    
+    s_bytes(b"\x00\x06", name='Length', fuzzable=False)
+    s_byte(0xff,name='unit Identifier',fuzzable=False)    
     #Modbus
     s_byte(0x02,name='Read Discrete Inputs',fuzzable=False)
     s_bytes(b"\x00\x00", name='Start address', fuzzable=True)
@@ -149,10 +173,10 @@ def main():
 
     s_initialize("Read Input Registers")
     #ModbusTCP
-    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=True)
+    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=False)
     s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
-    s_bytes(b"\x00\x06", name='Length', fuzzable=True)
-    s_byte(0xff,name='unit Identifier',fuzzable=True)    
+    s_bytes(b"\x00\x06", name='Length', fuzzable=False)
+    s_byte(0xff,name='unit Identifier',fuzzable=False)    
     #Modbus
     s_byte(0x04,name='Read Input Registers',fuzzable=False)
     s_bytes(b"\x00\x00", name='Start address', fuzzable=True)
@@ -160,10 +184,10 @@ def main():
 
     s_initialize("Read Multiple Holding Registers")
     #ModbusTCP
-    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=True)
+    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=False)
     s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
-    s_bytes(b"\x00\x06", name='Length', fuzzable=True)
-    s_byte(0xff,name='unit Identifier',fuzzable=True)    
+    s_bytes(b"\x00\x06", name='Length', fuzzable=False)
+    s_byte(0xff,name='unit Identifier',fuzzable=False)    
     #Modbus
     s_byte(0x03,name='Read Multiple Holding Registers',fuzzable=False)
     s_bytes(b"\x00\x01", name='Start address', fuzzable=True)
@@ -172,10 +196,10 @@ def main():
     #Write registers
     s_initialize("Write Single Holding Register")
     #ModbusTCP
-    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=True)
+    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=False)
     s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
-    s_bytes(b"\x00\x06", name='Length', fuzzable=True)
-    s_byte(0xff,name='unit Identifier',fuzzable=True)    
+    s_bytes(b"\x00\x06", name='Length', fuzzable=False)
+    s_byte(0xff,name='unit Identifier',fuzzable=False)    
     #Modbus
     s_byte(0x06,name='Write Single Holding Register',fuzzable=False)
     s_bytes(b"\x00\x01", name='Referance Number - address', fuzzable=True)
@@ -183,10 +207,10 @@ def main():
 
     s_initialize("Write Single Coil")
     #ModbusTCP
-    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=True)
+    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=False)
     s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
-    s_bytes(b"\x00\x06", name='Length', fuzzable=True)
-    s_byte(0xff,name='unit Identifier',fuzzable=True)    
+    s_bytes(b"\x00\x06", name='Length', fuzzable=False)
+    s_byte(0xff,name='unit Identifier',fuzzable=False)    
     #Modbus
     s_byte(0x05,name='Write Single Coil',fuzzable=False)
     s_bytes(b"\x00\x01", name='Output address', fuzzable=True)
@@ -194,10 +218,10 @@ def main():
 
     s_initialize("Write Multiple Coils")
     #ModbusTCP
-    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=True)
+    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=False)
     s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
-    s_bytes(b"\x00\x06", name='Length', fuzzable=True)
-    s_byte(0xff,name='unit Identifier',fuzzable=True)    
+    s_bytes(b"\x00\x06", name='Length', fuzzable=False)
+    s_byte(0xff,name='unit Identifier',fuzzable=False)    
     #Modbus
     s_byte(0x0f,name='Write Multiple Coils',fuzzable=False)
     s_bytes(b"\x00\x00", name='Referance number', fuzzable=True)
@@ -207,10 +231,10 @@ def main():
 
     s_initialize("Write Multiple Holding Registers")
     #ModbusTCP
-    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=True)
+    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=False)
     s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
-    s_bytes(b"\x00\x06", name='Length', fuzzable=True)
-    s_byte(0xff,name='unit Identifier',fuzzable=True)    
+    s_bytes(b"\x00\x06", name='Length', fuzzable=False)
+    s_byte(0xff,name='unit Identifier',fuzzable=False)    
     #Modbus
     s_byte(0x10,name='Write Multiple Holding Registers',fuzzable=False)
     s_bytes(b"\x00\x00", name='Referance number', fuzzable=True)
@@ -221,10 +245,10 @@ def main():
 
     s_initialize("Read/Write Multiple Registers")
     #ModbusTCP
-    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=True)
+    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=False)
     s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
-    s_bytes(b"\x00\x06", name='Length', fuzzable=True)
-    s_byte(0xff,name='unit Identifier',fuzzable=True)    
+    s_bytes(b"\x00\x06", name='Length', fuzzable=False)
+    s_byte(0xff,name='unit Identifier',fuzzable=False)    
     #Modbus
     s_byte(0x17,name='Read/Write Multiple Registers',fuzzable=False)
     s_bytes(b"\x00\x00", name='Read Referance number', fuzzable=True)
@@ -236,10 +260,10 @@ def main():
 
     s_initialize("Mask Write Register")
     #ModbusTCP
-    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=True)
+    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=False)
     s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
-    s_bytes(b"\x00\x06", name='Length', fuzzable=True)
-    s_byte(0xff,name='unit Identifier',fuzzable=True)    
+    s_bytes(b"\x00\x06", name='Length', fuzzable=False)
+    s_byte(0xff,name='unit Identifier',fuzzable=False)    
     #Modbus
     s_byte(0x16,name='Mask Write Register',fuzzable=False)
     s_byte(0x00,name='Ref address',fuzzable=False)
@@ -251,33 +275,33 @@ def main():
 
     s_initialize("Read File Record")
     #ModbusTCP
-    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=True)
+    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=False)
     s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
-    s_bytes(b"\x00\x06", name='Length', fuzzable=True)
-    s_byte(0xff,name='unit Identifier',fuzzable=True)    
+    s_bytes(b"\x00\x06", name='Length', fuzzable=False)
+    s_byte(0xff,name='unit Identifier',fuzzable=False)    
     #Modbus
     s_byte(0x14,name='Read File Record',fuzzable=False)
-    s_byte(0x00,name='Byte count',fuzzable=False)
+    s_byte(0x00,name='Byte count',fuzzable=True)
 
     s_initialize("Write File Record")
     #ModbusTCP
-    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=True)
+    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=False)
     s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
-    s_bytes(b"\x00\x06", name='Length', fuzzable=True)
-    s_byte(0xff,name='unit Identifier',fuzzable=True)    
+    s_bytes(b"\x00\x06", name='Length', fuzzable=False)
+    s_byte(0xff,name='unit Identifier',fuzzable=False)    
     #Modbus
     s_byte(0x15,name='WriteFileRecord',fuzzable=False)
-    s_byte(0x00,name='Byte count',fuzzable=False)
+    s_byte(0x00,name='Byte count',fuzzable=True)
     s_string('AA', name='Data for input', fuzzable=True)
 
     #Diagnostics functions codes
 
     s_initialize("Read Exception Status")
     #ModbusTCP
-    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=True)
+    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=False)
     s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
-    s_bytes(b"\x00\x06", name='Length', fuzzable=True)
-    s_byte(0xff,name='unit Identifier',fuzzable=True)    
+    s_bytes(b"\x00\x06", name='Length', fuzzable=False)
+    s_byte(0xff,name='unit Identifier',fuzzable=False)    
     #Modbus
     s_byte(0x07,name='Read Exception Status',fuzzable=False)
 
@@ -287,19 +311,19 @@ def main():
 
     s_initialize("Report Slave ID")
     #ModbusTCP
-    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=True)
+    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=False)
     s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
-    s_bytes(b"\x00\x06", name='Length', fuzzable=True)
-    s_byte(0xff,name='unit Identifier',fuzzable=True)    
+    s_bytes(b"\x00\x06", name='Length', fuzzable=False)
+    s_byte(0xff,name='unit Identifier',fuzzable=False)    
     #Modbus
     s_byte(0x11,name='Report Slave ID',fuzzable=False)
 
     s_initialize("Read Device Identification")
     #ModbusTCP
-    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=True)
+    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=False)
     s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
-    s_bytes(b"\x00\x06", name='Length', fuzzable=True)
-    s_byte(0xff,name='unit Identifier',fuzzable=True)    
+    s_bytes(b"\x00\x06", name='Length', fuzzable=False)
+    s_byte(0xff,name='unit Identifier',fuzzable=False)    
     #Modbus
     s_byte(0x2b,name='Read Device Identification',fuzzable=False)
     s_byte(0x00, name='MAI Type', fuzzable=True)
