@@ -5,6 +5,7 @@
 import sys
 from boofuzz import *
 
+
 def main():
 
     #variables and lists
@@ -29,7 +30,9 @@ def main():
     functioncodeReadCoilMemory = ["Read Coil Memory"]
     functioncodeBase = ["Base"] 
 
-
+    #verbose logging information
+    csv_log = open('fuzz_results.csv', 'wb') ## create a csv file
+    my_logger = [FuzzLoggerCsv(file_handle=csv_log)] ### create a FuzzLoggerCSV object with the file handle of our csv file
 
 
     # Checking command arguments and usage
@@ -129,9 +132,10 @@ def main():
     #Connect to the Modbus devise
     session = Session(
         target=Target(
-            connection=TCPSocketConnection(host, port),
-        ),
+            connection=TCPSocketConnection(host, port)), fuzz_loggers=my_logger, ## set my_logger (csv) as the logger for the session
     )
+
+    #session = Session(target=Target(SocketConnection(host, int(port))), post_test_case_callbacks=[target_alive])
 
     # Boofuzz initializers ----
     # base fuzzing ModbusTCP
