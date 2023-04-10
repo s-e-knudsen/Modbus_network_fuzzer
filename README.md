@@ -21,6 +21,8 @@ Python3 modbus.py 10.10.10.10 502
 ````
 
 
+Be aware fuzzing can take time. If you run the all function codes it takes a long time due to many test cases
+
 -------------------------------------------------------------------------------------------------
 
 The modbus fuzzer is managed by Egede and attributions and support from other is verry welcome 😊
