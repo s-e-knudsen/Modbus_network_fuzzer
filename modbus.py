@@ -132,8 +132,8 @@ def main():
     #Connect to the Modbus devise
     session = Session(
         target=Target(
-            connection=TCPSocketConnection(host, port)), fuzz_loggers=my_logger, ## set my_logger (csv) as the logger for the session
-    )
+            connection=TCPSocketConnection(host, port)),fuzz_loggers=my_logger) ## set my_logger (csv) as the logger for the session
+    
 
     #session = Session(target=Target(SocketConnection(host, int(port))), post_test_case_callbacks=[target_alive])
 
