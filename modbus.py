@@ -10,7 +10,7 @@ def main():
     menuactive = True
     menuAnswer = 0
     functionCodesToFuzz = []
-    functionCodesAll = ["Base", "Read Device Identification", "Read Discrete Inputs", "Read Input Registers", "Read Multiple Holding Registers", "Write Single Holding Register", "Write Single Coil", "Write Multiple Coils", "Write Multiple Holding Registers", "Read/Write Multiple Registers", "Mask Write Register", "Read File Record", "Write File Record", "Read Exception Status", "Report Slave ID"]
+    functionCodesAll = ["Base", "Read Device Identification", "Read Discrete Inputs", "Read Input Registers", "Read Multiple Holding Registers", "Write Single Holding Register", "Write Single Coil", "Write Multiple Coils", "Write Multiple Holding Registers", "Read/Write Multiple Registers", "Mask Write Register", "Read File Record", "Write File Record", "Read Exception Status", "Report Slave ID", "Read Registers FC 67", "Read Registers FC 68", "Write Single Register float FC 70", "Write Multiple Foat Registers FC 80"]
     functionCodeReadDeviceIdentification = ["Read Device Identification"]
     functionCodesReadDiscreteInputs = ["Read Discrete Inputs"]
     functioncodeReadInputRegisters = ["Read Input Registers"]
@@ -26,7 +26,11 @@ def main():
     functioncodeReadExceptionStatus = ["Read Exception Status"]
     functioncodeReportSlaveID = ["Report Slave ID"]
     functioncodeReadCoilMemory = ["Read Coil Memory"]
-    functioncodeBase = ["Base"] 
+    functioncodeBase = ["Base"]
+    functioncode67 = ["Read Registers FC 67"]
+    functioncode68 = ["Read Registers FC 68"]
+    functioncode70 = ["Write Single Register float FC 70"]
+    functioncode80 = ["Write Multiple Foat Registers FC 80"]
 
 
 
@@ -63,6 +67,12 @@ def main():
         15. Fuzz Report Slave ID
         16. Fuzz Read Coil Memory
         20. Fuzz ModbusTCP - Base protocol
+        - - - - - - - - - - - - - - - - - - - 
+        90. Fuzz ModbusTCP - FC67 - non standard - Read float registers
+        91. Fuzz ModbusTCP - FC68 - non standard - Read float registers
+        92. Fuzz ModbusTCP - FC70 - non standard - Write single float registers
+        93. Fuzz ModbusTCP - FC80 - Non standard - Write multible float registers
+        - - - - - - - - - - - - - - - - - - - 
         0. Exit
         """)
         menuAnswer = input("\nSelect an option: ")
@@ -117,7 +127,19 @@ def main():
             break      
         elif int(menuAnswer) == 20:
             functionCodesToFuzz = functioncodeBase
-            break       
+            break
+        elif int(menuAnswer) == 90:
+            functionCodesToFuzz = functioncode67
+            break    
+        elif int(menuAnswer) == 91:
+            functionCodesToFuzz = functioncode68
+            break
+        elif int(menuAnswer) == 92:
+            functionCodesToFuzz = functioncode70
+            break
+        elif int(menuAnswer) == 93:
+            functionCodesToFuzz = functioncode80
+            break      
         elif int(menuAnswer) == 0:
             print("\n Exiting the modbus fuzzer!")
             exit(0)
@@ -182,6 +204,28 @@ def main():
     s_bytes(b"\x00\x00", name='Start address', fuzzable=True)
     s_bytes(b"\x00\x00", name='Word count - amount - quantity', fuzzable=True)
 
+    s_initialize("Read Registers FC 67")
+    #ModbusTCP - Non standard FC
+    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=False)
+    s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
+    s_bytes(b"\x00\x06", name='Length', fuzzable=False)
+    s_byte(0xff,name='unit Identifier',fuzzable=False)    
+    #Modbus
+    s_byte(0x43,name='Read Registers FC67',fuzzable=False)
+    s_bytes(b"\x00\x00", name='Start address', fuzzable=True)
+    s_bytes(b"\x00\x00", name='Word count - amount - quantity', fuzzable=True)
+
+    s_initialize("Read Registers FC 68")
+    #ModbusTCP - Non standard FC
+    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=False)
+    s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
+    s_bytes(b"\x00\x06", name='Length', fuzzable=False)
+    s_byte(0xff,name='unit Identifier',fuzzable=False)    
+    #Modbus
+    s_byte(0x44,name='Read Registers FC68',fuzzable=False)
+    s_bytes(b"\x00\x00", name='Start address', fuzzable=True)
+    s_bytes(b"\x00\x00", name='Word count - amount - quantity', fuzzable=True)
+
     s_initialize("Read Multiple Holding Registers")
     #ModbusTCP
     s_bytes(b"\x00\x01", name='Trans ID', fuzzable=False)
@@ -202,6 +246,17 @@ def main():
     s_byte(0xff,name='unit Identifier',fuzzable=False)    
     #Modbus
     s_byte(0x06,name='Write Single Holding Register',fuzzable=False)
+    s_bytes(b"\x00\x01", name='Referance Number - address', fuzzable=True)
+    s_bytes(b"\x00\x10", name='Data - value', fuzzable=True)
+
+    s_initialize("Write Single Register float FC 70")
+    #ModbusTCP Non standard FC
+    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=False)
+    s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
+    s_bytes(b"\x00\x06", name='Length', fuzzable=False)
+    s_byte(0xff,name='unit Identifier',fuzzable=False)    
+    #Modbus
+    s_byte(0x46,name='Write Single Register float FC 70',fuzzable=False)
     s_bytes(b"\x00\x01", name='Referance Number - address', fuzzable=True)
     s_bytes(b"\x00\x10", name='Data - value', fuzzable=True)
 
@@ -242,6 +297,21 @@ def main():
     s_byte(0x00, name='byte count', fuzzable=True)
     s_byte(0x00, name='register number', fuzzable=True)
     s_string('AA', name='Data for input', fuzzable=True)
+
+    s_initialize("Write Multiple Foat Registers FC 80")
+    #ModbusTCP - non standard
+    s_bytes(b"\x00\x01", name='Trans ID', fuzzable=False)
+    s_bytes(b"\x00\x00", name='Protocol ID', fuzzable=False) #0 for modbusTCP
+    s_bytes(b"\x00\x06", name='Length', fuzzable=False)
+    s_byte(0xff,name='unit Identifier',fuzzable=False)    
+    #Modbus
+    s_byte(0x50,name='Write Multiple Foat Registers FC 80',fuzzable=False)
+    s_bytes(b"\x00\x00", name='Referance number', fuzzable=True)
+    s_bytes(b"\x00\x01", name='Quantety - word count', fuzzable=True)
+    s_byte(0x00, name='byte count', fuzzable=True)
+    s_byte(0x00, name='register number', fuzzable=True)
+    s_string('AA', name='Data for input', fuzzable=True)
+
 
     s_initialize("Read/Write Multiple Registers")
     #ModbusTCP
