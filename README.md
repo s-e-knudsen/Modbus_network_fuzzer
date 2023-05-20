@@ -20,6 +20,8 @@ Python3 modbus.py 10.10.10.10 502
 
 ````
 
+Be aware fuzzing can take time. If you run the all function codes it takes a long time due to many test cases.<br>
+It is possible to run multible instances of the of the fuzzer on the same test pc.
 
 Be aware fuzzing can take time. If you run the all function codes it takes a long time due to many test cases.<br>
 It is possible to run multible instances of the of the fuzzer on the same test pc. 
